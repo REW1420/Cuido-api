@@ -27,6 +27,8 @@ Route::controller(UsersController::class)->group(function () {
     Route::get('/users/{id}', 'show');
     Route::get('/users/code{code}', 'code');
     Route::post('/users', 'store');
+    Route::delete('/users/{user_id}', 'delete_user_id');
+
 });
 
 
@@ -34,9 +36,10 @@ Route::controller(UsersController::class)->group(function () {
 Route::controller(OrdersController::class)->group(function () {
     Route::get('/orders', 'index');
     Route::get('/orders/{id}', 'show');
+    //obtener datos por user-id
     Route::get('/orders/code/{code}', 'code');
     Route::post('/orders', 'store');
     Route::put('/orders/{id}', 'App\Http\Controllers\OrdersController@update');
     Route::delete('/orders/{id}', 'App\Http\Controllers\OrdersController@destroy');
-    Route::get('/orders/where/{is_delivered_by}' ,'showOrderByRole');
+    Route::get('/orders/where/{is_delivered_by}', 'showOrderByRole');
 });

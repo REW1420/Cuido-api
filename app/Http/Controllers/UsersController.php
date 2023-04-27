@@ -35,6 +35,7 @@ class UsersController extends Controller
     {
         $user = new User();
         $user->user_id = $request->user_id;
+        $user->profile_photo = $request->profile_photo;
         $user->first_name = $request->first_name;
         $user->second_name = $request->second_name;
         $user->email = $request->email;
@@ -83,7 +84,7 @@ class UsersController extends Controller
         $user->email = $request->email;
         $user->phone_number = $request->phone_number;
         $user->password = $request->password;
-        $user -> role = $request -> role;
+        $user->role = $request->role;
         $user->save();
         $user->touch();
 
@@ -112,4 +113,19 @@ class UsersController extends Controller
 
 
     }
+
+    public function delete_user_id($user_id)
+    {
+        $user = User::find($user_id);
+
+        if (!$user) {
+            return response()->json(["message" => "user_id not found"]);
+        } else {
+            $user->delete();
+            return response()->json([
+                "message" => "User delete"
+            ]);
+        }
+    }
+
 }
