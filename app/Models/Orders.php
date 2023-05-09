@@ -21,7 +21,9 @@ class Orders extends Model
         'is_delivered_by',
         'user_phone_number',
         'location_lat',
-        'location_long'
+        'location_long',
+        'client_name',
+        'is_being_delivering'
 
     ];
     
@@ -35,4 +37,3 @@ class Orders extends Model
         parent::save($options);
     }
 }
-

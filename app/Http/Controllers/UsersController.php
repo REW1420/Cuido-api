@@ -72,23 +72,82 @@ class UsersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
+        $user = User::where('user_id', $id)->first();
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        $user->user_id = $request->user_id;
+
         $user->first_name = $request->first_name;
         $user->second_name = $request->second_name;
-        $user->email = $request->email;
+
         $user->phone_number = $request->phone_number;
-        $user->password = $request->password;
-        $user->role = $request->role;
+
         $user->save();
         $user->touch();
 
         return response()->json(['message' => 'User update', 'user' => $user]);
+    }
+
+    public function updateEmail(Request $request, $id)
+    {
+        $user = User::where('user_id', $id)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $user->email = $request->email;
+        $user->save();
+        $user->touch();
+
+        return response()->json(['message' => 'User email updated', 'user' => $user]);
+    }
+
+
+    public function code($user_id)
+    {
+        $user = User::where('user_id', $user_id)->get();
+        return $user;
+    }
+    /**show
+     *show users by role
+     */
+    public function role($role)
+    {
+        $user = User::where('role', $role)->get();
+        return $user;
+    }
+
+    /** 
+     *Delete user by user_id
+     */
+    public function delete_user_id($user_id)
+    {
+        $user = User::find($user_id);
+
+        if (!$user) {
+            return response()->json(["message" => "user_id not found"]);
+        } else {
+            $user->delete();
+            return response()->json([
+                "message" => "User delete"
+            ]);
+        }
+    }
+
+    public function getUserRoleByEmail($email)
+    {
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json(["role", "none"], 200);
+        }
+
+        return response()->json([
+            'role' => $user->role,
+        ], 200);
     }
 
     /**
@@ -113,19 +172,4 @@ class UsersController extends Controller
 
 
     }
-
-    public function delete_user_id($user_id)
-    {
-        $user = User::find($user_id);
-
-        if (!$user) {
-            return response()->json(["message" => "user_id not found"]);
-        } else {
-            $user->delete();
-            return response()->json([
-                "message" => "User delete"
-            ]);
-        }
-    }
-
 }

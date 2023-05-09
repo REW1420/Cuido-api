@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Orders;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrdersController extends Controller
 {
@@ -33,32 +34,22 @@ class OrdersController extends Controller
     */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'user_id' => 'required',
-           
-            'products' => 'required|array',
-            'total_price' => 'required',
-            'comments' => 'nullable',
-            'delivered' => 'required|boolean',
-            'paid' => 'required|boolean',
-            'is_delivered_by' => 'required',
-            'location_lat' => 'required',
-            'location_long' => 'required',
-            "user_phone_number" => 'required'
-        ]);
+
 
         $order = new Orders();
-        $order->user_id = $validatedData['user_id'];
-       
-        $order->products = $validatedData['products'];
-        $order->total_price = $validatedData['total_price'];
-        $order->comments = $validatedData['comments'];
-        $order->delivered = $validatedData['delivered'];
-        $order->paid = $validatedData['paid'];
-        $order->is_delivered_by = $validatedData['is_delivered_by'];
-        $order->location_lat = $validatedData['location_lat'];
-        $order->location_long = $validatedData['location_long'];
-        $order->user_phone_number = $validatedData['user_phone_number'];
+        $order->user_id = $request->user_id;
+
+        $order->products = $request->products;
+        $order->total_price = $request->total_price;
+        $order->comments = $request->comments;
+        $order->delivered = $request->delivered;
+        $order->paid = $request->paid;
+        $order->is_delivered_by = $request->is_delivered_by;
+        $order->location_lat = $request->location_lat;
+        $order->location_long = $request->location_long;
+        $order->user_phone_number = $request->user_phone_number;
+        $order->is_being_delivering = $request->is_being_delivering;
+        $order->client_name=$request->client_name;
         $order->save();
 
         return response()->json([
@@ -105,22 +96,36 @@ class OrdersController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update($id)
     {
         $order = Orders::find($id);
-
-        if (!$order) {
-            return response()->json(['message' => 'Order not found'], 404);
-        }
-
-        $order->delivered = $request->delivered;
-        $order->paid = $request->paid;
-        $order->save();
-        $order->touch();
-
-        return response()->json(['message' => 'Order update', 'order' => $order]);
-
+        return $order;
     }
+        
+        
+    public function statusUpdate(Request $request, $id)
+    {
+        $orders = Orders::find($id);
+    
+        if (!$orders) {
+            return response()->json([
+                "mensaje" => "Order with ID $id doesn't exist"
+            ], 404);
+        } else {
+            $orders->paid = $request->input('paid');
+            $orders->delivered = $request->input('delivered');
+            $orders->save();
+    
+            return response()->json([
+                "message" => "Order status updated",
+                "order" => $id
+            ]);
+        }
+    }
+    
+    
+
+
 
 
 
@@ -145,5 +150,49 @@ class OrdersController extends Controller
         }
 
 
+    }
+    
+    /**
+    *get all the data with delivered and paid true
+    */
+    
+    function getPaidAndDeliveredData($delivererId)
+    {
+      $data = Orders::where('paid', true)
+                ->where('delivered', true)
+                ->where('is_delivered_by', $delivererId)
+                ->get();
+    return $data;
+    }
+    
+        function getPaidAndDeliveredDataClient($delivererId)
+    {
+      $data = Orders::where('paid', true)
+                ->where('delivered', true)
+                ->where('user_id', $delivererId)
+                ->get();
+    return $data;
+    }
+    
+     /**
+    *get all the data with delivered and paid false
+    */
+    
+    function getNoPaidAndDeliveredData($delivererId)
+    {
+   $data = Orders::where('paid', false)
+                ->where('delivered', false)
+                ->where('is_delivered_by', $delivererId)
+                ->get();
+     return $data;
+    }
+    
+        function getNoPaidAndDeliveredDataClient($user_id)
+    {
+   $data = Orders::where('paid', false)
+                ->where('delivered', false)
+                ->where('user_id', $user_id)
+                ->get();
+     return $data;
     }
 }
